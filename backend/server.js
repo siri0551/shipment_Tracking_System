@@ -7,6 +7,7 @@ const connectDB = require("./src/config/db");
 
 const authRoutes = require("./src/routes/auth.routes");
 const shipmentRoutes = require("./src/routes/shipment.routes");
+const blockchainRoutes = require("./src/routes/blockchain.routes");
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/shipments", shipmentRoutes);
+app.use("/api/blockchain", blockchainRoutes);
 
 app.get("/", (req, res) => res.json({ message: "Shipment Tracking API Running" }));
 
