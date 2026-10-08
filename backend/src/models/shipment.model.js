@@ -32,6 +32,23 @@ const shipmentSchema = new mongoose.Schema(
     status: { type: String, enum: STATUSES, default: "Created" },
     estimatedDelivery: { type: Date },
     actualDelivery: { type: Date },
+    currentLocation: {
+      address: { type: String },
+      city: { type: String },
+      country: { type: String },
+      coordinates: {
+        lat: { type: Number },
+        lng: { type: Number },
+      },
+    },
+    statusHistory: [
+      {
+        status: { type: String },
+        timestamp: { type: Date, default: Date.now },
+        note: { type: String },
+        location: { type: String },
+      },
+    ],
     blockchainTxHash: { type: String, default: null },
     contractShipmentId: { type: Number, default: null },
     isVerified: { type: Boolean, default: false },
