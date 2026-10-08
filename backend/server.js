@@ -11,6 +11,8 @@ const authRoutes = require("./src/routes/auth.routes");
 const shipmentRoutes = require("./src/routes/shipment.routes");
 const blockchainRoutes = require("./src/routes/blockchain.routes");
 const trackingRoutes = require("./src/routes/tracking.routes");
+const qrRoutes = require("./src/routes/qr.routes");
+const historyRoutes = require("./src/routes/history.routes");
 
 const app = express();
 const server = http.createServer(app);
@@ -29,6 +31,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/shipments", shipmentRoutes);
 app.use("/api/blockchain", blockchainRoutes);
 app.use("/api/tracking", trackingRoutes);
+app.use("/api/qr", qrRoutes);
+app.use("/api/history", historyRoutes);
 
 // Socket.io — clients join a room by trackingId to get real-time updates
 io.on("connection", (socket) => {

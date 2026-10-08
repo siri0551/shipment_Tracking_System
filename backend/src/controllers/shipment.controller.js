@@ -1,9 +1,20 @@
 const Shipment = require("../models/shipment.model");
+const { logHistory } = require("./history.controller");
 
 // POST /api/shipments — Create shipment (Manufacturer, Admin)
 const createShipment = async (req, res) => {
   try {
     const shipment = await Shipment.create({ ...req.body, sender: req.user._id });
+
+    await logHistory({
+      shipmentId: shipment._id,
+      trackingId: shipment.trackingId,
+      action: "Created",
+      performedBy: req.user._id,
+      newValue: { status: shipment.status },
+      ipAddress: req.ip,
+    });
+
     res.status(201).json({ success: true, shipment });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

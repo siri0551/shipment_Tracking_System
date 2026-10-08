@@ -1,5 +1,6 @@
 const Shipment = require("../models/shipment.model");
 const TrackingEvent = require("../models/trackingEvent.model");
+const { logHistory } = require("./history.controller");
 
 const STATUS_ORDER = ["Created", "Picked Up", "In Transit", "Warehouse", "Out for Delivery", "Delivered"];
 
@@ -40,6 +41,16 @@ const addTrackingUpdate = async (req, res) => {
     // Emit real-time update via socket.io
     const io = req.app.get("io");
     if (io) io.to(shipment.trackingId).emit("trackingUpdate", { status, location, note, timestamp: new Date() });
+
+    await logHistory({
+      shipmentId: shipment._id,
+      trackingId: shipment.trackingId,
+      action: "Status Changed",
+      performedBy: req.user._id,
+      previousValue: { status: shipment.status },
+      newValue: { status, location },
+      ipAddress: req.ip,
+    });
 
     res.status(201).json({ success: true, event, shipment });
   } catch (err) {

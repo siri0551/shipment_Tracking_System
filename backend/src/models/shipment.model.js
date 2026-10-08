@@ -49,6 +49,7 @@ const shipmentSchema = new mongoose.Schema(
         location: { type: String },
       },
     ],
+    qrCode: { type: String, default: null },
     blockchainTxHash: { type: String, default: null },
     contractShipmentId: { type: Number, default: null },
     isVerified: { type: Boolean, default: false },
