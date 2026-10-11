@@ -13,6 +13,8 @@ const blockchainRoutes = require("./src/routes/blockchain.routes");
 const trackingRoutes = require("./src/routes/tracking.routes");
 const qrRoutes = require("./src/routes/qr.routes");
 const historyRoutes = require("./src/routes/history.routes");
+const podRoutes = require("./src/routes/pod.routes");
+const tamperRoutes = require("./src/routes/tamper.routes");
 
 const app = express();
 const server = http.createServer(app);
@@ -33,6 +35,9 @@ app.use("/api/blockchain", blockchainRoutes);
 app.use("/api/tracking", trackingRoutes);
 app.use("/api/qr", qrRoutes);
 app.use("/api/history", historyRoutes);
+app.use("/api/pod", podRoutes);
+app.use("/api/tamper", tamperRoutes);
+app.use("/uploads", express.static("uploads"));
 
 // Socket.io — clients join a room by trackingId to get real-time updates
 io.on("connection", (socket) => {
