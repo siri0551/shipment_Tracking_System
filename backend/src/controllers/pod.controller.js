@@ -4,6 +4,7 @@ const Shipment = require("../models/shipment.model");
 const ProofOfDelivery = require("../models/proofOfDelivery.model");
 const { logHistory } = require("./history.controller");
 const { uploadImage } = require("../config/cloudinary");
+const { sendEmail, deliveryOTPEmail, deliveryConfirmedEmail } = require("../utils/email");
 
 // POST /api/pod/generate-otp/:id — Generate OTP for delivery verification
 const generateOTP = async (req, res) => {
@@ -27,7 +28,8 @@ const generateOTP = async (req, res) => {
     }
 
     // In production send OTP via SMS/email — returning here for dev
-    res.json({ success: true, message: "OTP generated", otp, expiresAt: otpExpiresAt });
+    await sendEmail(deliveryOTPEmail(shipment.receiver, shipment.trackingId, otp));
+    res.json({ success: true, message: "OTP generated and sent", expiresAt: otpExpiresAt });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

@@ -1,6 +1,7 @@
 const Shipment = require("../models/shipment.model");
 const TrackingEvent = require("../models/trackingEvent.model");
 const { logHistory } = require("./history.controller");
+const { sendEmail, statusUpdateEmail, deliveryConfirmedEmail } = require("../utils/email");
 
 const STATUS_ORDER = ["Created", "Picked Up", "In Transit", "Warehouse", "Out for Delivery", "Delivered"];
 
@@ -51,6 +52,12 @@ const addTrackingUpdate = async (req, res) => {
       newValue: { status, location },
       ipAddress: req.ip,
     });
+
+    const emailFn = status === "Delivered" ? deliveryConfirmedEmail : statusUpdateEmail;
+    const emailArgs = status === "Delivered"
+      ? [shipment.receiver, shipment.trackingId]
+      : [shipment.receiver, shipment.trackingId, status];
+    await sendEmail(emailFn(...emailArgs));
 
     res.status(201).json({ success: true, event, shipment });
   } catch (err) {

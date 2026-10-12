@@ -1,5 +1,7 @@
 const Shipment = require("../models/shipment.model");
 const { logHistory } = require("./history.controller");
+const { paginate, buildShipmentFilter } = require("../utils/pagination");
+const { sendEmail, shipmentCreatedEmail } = require("../utils/email");
 
 // POST /api/shipments — Create shipment (Manufacturer, Admin)
 const createShipment = async (req, res) => {
@@ -15,28 +17,38 @@ const createShipment = async (req, res) => {
       ipAddress: req.ip,
     });
 
+    await sendEmail(shipmentCreatedEmail(shipment.receiver, shipment.trackingId));
+
     res.status(201).json({ success: true, shipment });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// GET /api/shipments — Get all shipments (Admin sees all, others see their own)
+// GET /api/shipments — Get all shipments with pagination & filtering
 const getShipments = async (req, res) => {
   try {
-    const filter =
-      req.user.role === "Admin"
-        ? {}
-        : req.user.role === "Carrier"
-        ? { carrier: req.user._id }
-        : { sender: req.user._id };
+    const roleFilter =
+      req.user.role === "Admin" ? {} :
+      req.user.role === "Carrier" ? { carrier: req.user._id } :
+      { sender: req.user._id };
+
+    const searchFilter = buildShipmentFilter(req);
+    const filter = { ...roleFilter, ...searchFilter };
+
+    const total = await Shipment.countDocuments(filter);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
     const shipments = await Shipment.find(filter)
       .populate("sender", "name email role")
       .populate("carrier", "name email role")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    res.json({ success: true, count: shipments.length, shipments });
+    res.json({ success: true, total, page, pages: Math.ceil(total / limit), count: shipments.length, shipments });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

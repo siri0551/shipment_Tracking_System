@@ -15,6 +15,8 @@ const qrRoutes = require("./src/routes/qr.routes");
 const historyRoutes = require("./src/routes/history.routes");
 const podRoutes = require("./src/routes/pod.routes");
 const tamperRoutes = require("./src/routes/tamper.routes");
+const analyticsRoutes = require("./src/routes/analytics.routes");
+const { globalLimiter, authLimiter, otpLimiter } = require("./src/middleware/rateLimit.middleware");
 
 const app = express();
 const server = http.createServer(app);
@@ -28,15 +30,17 @@ app.use(helmet());
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(globalLimiter);
 
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/shipments", shipmentRoutes);
 app.use("/api/blockchain", blockchainRoutes);
 app.use("/api/tracking", trackingRoutes);
 app.use("/api/qr", qrRoutes);
 app.use("/api/history", historyRoutes);
-app.use("/api/pod", podRoutes);
+app.use("/api/pod", otpLimiter, podRoutes);
 app.use("/api/tamper", tamperRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.use("/uploads", express.static("uploads"));
 
 // Socket.io — clients join a room by trackingId to get real-time updates
