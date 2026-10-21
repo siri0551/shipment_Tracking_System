@@ -20,8 +20,9 @@ const shipmentHistorySchema = new mongoose.Schema(
 );
 
 // Immutable — no updates or deletes allowed
-shipmentHistorySchema.pre(["updateOne", "findOneAndUpdate", "deleteOne", "findOneAndDelete"], function () {
-  throw new Error("Shipment history is immutable and cannot be modified or deleted");
-});
+shipmentHistorySchema.pre("updateOne", function (next) { next(new Error("Immutable")); });
+shipmentHistorySchema.pre("findOneAndUpdate", function (next) { next(new Error("Immutable")); });
+shipmentHistorySchema.pre("deleteOne", function (next) { next(new Error("Immutable")); });
+shipmentHistorySchema.pre("findOneAndDelete", function (next) { next(new Error("Immutable")); });
 
 module.exports = mongoose.model("ShipmentHistory", shipmentHistorySchema);

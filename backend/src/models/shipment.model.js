@@ -58,11 +58,10 @@ const shipmentSchema = new mongoose.Schema(
 );
 
 // Auto-generate trackingId before save
-shipmentSchema.pre("save", function (next) {
+shipmentSchema.pre("save", function () {
   if (!this.trackingId) {
     this.trackingId = "SHP-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7).toUpperCase();
   }
-  next();
 });
 
 module.exports = mongoose.model("Shipment", shipmentSchema);
